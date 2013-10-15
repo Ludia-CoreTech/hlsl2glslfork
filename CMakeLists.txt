@@ -219,5 +219,7 @@ include_directories(
     ${INCLUDE_FILES}
 )
 add_executable(hlsl2glsltest tests/hlsl2glsltest/hlsl2glsltest.cpp)
-
 target_link_libraries(hlsl2glsltest hlsl2glsl ${TEST_LIBS})
+
+add_executable(hlsl2glsles converter/main.cpp)
+target_link_libraries(hlsl2glsles hlsl2glsl)
