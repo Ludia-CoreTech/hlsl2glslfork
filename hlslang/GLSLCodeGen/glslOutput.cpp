@@ -315,6 +315,8 @@ static bool SafeEquals(const char* a, const char* b)
 
 void TGlslOutputTraverser::outputLineDirective (const TSourceLoc& line)
 {
+	return;
+
 	if (line.line <= 0 || !current)
 		return;
 	if (SafeEquals(line.file, m_LastLineOutput.file) && std::abs(line.line - m_LastLineOutput.line) < 4) // don't sprinkle too many #line directives ;)
