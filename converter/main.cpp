@@ -79,7 +79,7 @@ void ConvertAndWriteFile(const std::string& iname, const std::string &oname,
 		if (translateOk)
 		{
 			const std::string source = Hlsl2Glsl_GetShader(compiler);
-			std::cout << source << std::endl;
+			//std::cout << source << std::endl;
 			WriteStringToFile(oname.c_str(), source);
 		}
 		else
@@ -99,29 +99,49 @@ void ConvertAndWriteFile(const std::string& iname, const std::string &oname,
 
 void PrintUsage()
 {
-	std::cout << "Usage: hlsl2glsl infile outvert outfrag" << std::endl;
-	std::cout << "HLSL file should have fixed entrypoints VS and PS." << std::endl;
+	std::cout << "-f|v <entrypoint> <inputfile> <outputfile>" << std::endl;
+	std::cout << "\t-v: vertex shader" << std::endl;
+	std::cout << "\t-f: fragment shader" << std::endl;
+	std::cout << "\tentry point: usually VS or FS" << std::endl;
 }
 
 int main(int argc, char** argv)
 {
-	if (argc != 4)
+	if (argc != 5)
 	{
 		std::cout << "Invalid number of arguments" << std::endl;
 		PrintUsage();
-		return 0;
+		return 1;
 	}
+
+	bool vertex = false;
+	if (argv[1][0] == '-')
+		if (0 == strcmp("-v", argv[1]))
+			vertex = true;
+		if (0 == strcmp("-f", argv[1]))
+			vertex = false;
+
+	const std::string entryPoint   = argv[2];
+	const std::string inputFile    = argv[3];
+	const std::string outputFile   = argv[4];
+
+	if (0 == inputFile.compare(outputFile))
+	{
+		std::cerr << "Input and output cannot be the same" << std::endl;
+		return 1;
+	}
+
+	const EShLanguage lang = vertex ? EShLangVertex : EShLangFragment;
 
 	Hlsl2Glsl_Initialize();
 
-	const std::string inputFile = argv[1];
-	const std::string outVert   = argv[2];
-	const std::string outFrag   = argv[3];
-
-	try {
-		ConvertAndWriteFile(inputFile, outVert, "VS", EShLangVertex);
-		ConvertAndWriteFile(inputFile, outFrag, "PS", EShLangFragment);
-	} catch (std::exception& ex) {
+	try
+	{
+		ConvertAndWriteFile(inputFile, outputFile, entryPoint.c_str(), lang);
+		std::cout << "Converted " << inputFile.c_str() << " to " << outputFile.c_str() << std::endl;
+	}
+	catch (std::exception& ex)
+	{
 		std::cerr << ex.what() << std::endl;
 		Hlsl2Glsl_Shutdown();
 		return 1;
